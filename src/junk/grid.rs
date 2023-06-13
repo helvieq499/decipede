@@ -8,3 +8,9 @@ impl Default for JunkGrid {
         Self([[false; crate::GRID_HEIGHT as usize]; crate::GRID_WIDTH as usize])
     }
 }
+
+impl JunkGrid {
+    pub fn reset(&mut self) {
+        drop(std::mem::replace(self, JunkGrid::default()));
+    }
+}

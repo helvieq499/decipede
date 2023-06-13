@@ -60,6 +60,7 @@ pub fn snake_movement(
     mut commands: Commands,
     junk: Res<crate::junk::grid::JunkGrid>,
     mut snakes: Query<(Entity, &mut Snake)>,
+    mut next_state: ResMut<NextState<crate::menu::GameState>>,
 ) {
     let snake_count = snakes.iter().count();
 
@@ -97,8 +98,7 @@ pub fn snake_movement(
             commands.entity(entity).despawn();
 
             if snake_count == 1 {
-                // just create a new snake for now
-                create_snake(&mut commands, crate::GRID_WIDTH / 2, 0, 20, rand::random());
+                next_state.set(crate::menu::GameState::Menu);
             }
         }
     }
