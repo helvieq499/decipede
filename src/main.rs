@@ -2,6 +2,7 @@ use bevy::{prelude::*, window::WindowResolution};
 
 mod junk;
 mod menu;
+mod player;
 mod snake;
 mod utils;
 
@@ -9,6 +10,8 @@ pub const GRID_WIDTH: usize = 75;
 pub const GRID_HEIGHT: usize = 50;
 pub const CELL_WIDTH: usize = 16;
 pub const CELL_HEIGHT: usize = 16;
+pub const X_EXTENT: f32 = ((crate::GRID_WIDTH - 1) * crate::CELL_WIDTH / 2) as f32;
+pub const Y_EXTENT: f32 = ((crate::GRID_HEIGHT - 1) * crate::CELL_HEIGHT / 2) as f32;
 
 fn main() {
     App::new()
@@ -39,16 +42,20 @@ fn main() {
         .add_system(menu::check_start_button.run_if(in_state(menu::GameState::Menu)))
         // junk tiles
         .init_resource::<junk::grid::JunkGrid>()
-        .add_system(junk::tile::create_junk_tiles.in_schedule(OnEnter(menu::GameState::Playing)))
+        .add_system(junk::tile::create.in_schedule(OnEnter(menu::GameState::Playing)))
         .add_system(junk::tile::cleanup.in_schedule(OnExit(menu::GameState::Playing)))
         // snake
-        .add_system(snake::create_initial_snake.in_schedule(OnEnter(menu::GameState::Playing)))
-        .add_system(snake::snake_movement.run_if(in_state(menu::GameState::Playing)))
+        .add_system(snake::create_initial.in_schedule(OnEnter(menu::GameState::Playing)))
+        .add_system(snake::update_movement.run_if(in_state(menu::GameState::Playing)))
         .add_system(
-            snake::snake_render
-                .after(snake::snake_movement)
+            snake::update_render
+                .after(snake::update_movement)
                 .run_if(in_state(menu::GameState::Playing)),
         )
+        // player
+        .add_system(player::create.in_schedule(OnEnter(menu::GameState::Playing)))
+        .add_system(player::update.run_if(in_state(menu::GameState::Playing)))
+        .add_system(player::cleanup.in_schedule(OnExit(menu::GameState::Playing)))
         .run();
 }
 

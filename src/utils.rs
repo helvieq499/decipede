@@ -7,3 +7,14 @@ pub fn grid_to_pixels(x: usize, y: usize) -> (f32, f32) {
         ((y as f32 - Y_OFFSET) * -(crate::CELL_HEIGHT as isize) as f32),
     )
 }
+
+pub fn invert_if<T>(num: T, condition: bool) -> T
+where
+    T: std::ops::Neg<Output = T>,
+{
+    if condition {
+        -num
+    } else {
+        num
+    }
+}

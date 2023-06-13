@@ -7,7 +7,7 @@ const JUNK_SCREEN: f32 = 0.8;
 #[derive(Component)]
 pub struct JunkTile;
 
-pub fn create_junk_tiles(mut commands: Commands, mut grid: ResMut<super::grid::JunkGrid>) {
+pub fn create(mut commands: Commands, mut grid: ResMut<super::grid::JunkGrid>) {
     debug_assert!(JUNK_SCREEN > 0., "screen junk ratio too low");
     debug_assert!(JUNK_SCREEN <= 1., "screen junk ratio too high");
 

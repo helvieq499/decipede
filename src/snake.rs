@@ -19,8 +19,8 @@ impl Snake {
     }
 }
 
-pub fn create_initial_snake(mut commands: Commands) {
-    create_snake(
+pub fn create_initial(mut commands: Commands) {
+    create(
         &mut commands,
         (crate::GRID_WIDTH / 2) as usize,
         0,
@@ -29,7 +29,7 @@ pub fn create_initial_snake(mut commands: Commands) {
     );
 }
 
-pub fn create_snake(commands: &mut Commands, x: usize, y: usize, grow: i8, is_going_left: bool) {
+pub fn create(commands: &mut Commands, x: usize, y: usize, grow: i8, is_going_left: bool) {
     let (fx, fy) = crate::utils::grid_to_pixels(x, y);
 
     commands
@@ -56,7 +56,7 @@ pub fn create_snake(commands: &mut Commands, x: usize, y: usize, grow: i8, is_go
         .insert(Snake::new(x, y, grow, is_going_left));
 }
 
-pub fn snake_movement(
+pub fn update_movement(
     mut commands: Commands,
     junk: Res<crate::junk::grid::JunkGrid>,
     mut snakes: Query<(Entity, &mut Snake)>,
@@ -72,7 +72,7 @@ pub fn snake_movement(
         };
 
         if snake.grow != 0 {
-            create_snake(
+            create(
                 &mut commands,
                 snake.x,
                 snake.y,
@@ -104,7 +104,7 @@ pub fn snake_movement(
     }
 }
 
-pub fn snake_render(mut snakes: Query<(&Snake, &mut Transform)>) {
+pub fn update_render(mut snakes: Query<(&Snake, &mut Transform)>) {
     for (snake, mut transform) in snakes.iter_mut() {
         (transform.translation.x, transform.translation.y) =
             crate::utils::grid_to_pixels(snake.x, snake.y);
