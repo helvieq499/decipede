@@ -6,6 +6,9 @@ mod player;
 mod snake;
 mod utils;
 
+mod state;
+pub use state::GameState;
+
 pub const GRID_WIDTH: usize = 75;
 pub const GRID_HEIGHT: usize = 50;
 pub const CELL_WIDTH: usize = 16;
@@ -35,27 +38,28 @@ fn main() {
         )
         .add_plugin(bevy_ecss::EcssPlugin::with_hot_reload())
         .add_startup_system(create_camera)
-        // state management & menu
-        .add_state::<menu::GameState>()
-        .add_system(menu::create.in_schedule(OnEnter(menu::GameState::Menu)))
-        .add_system(menu::cleanup.in_schedule(OnExit(menu::GameState::Menu)))
-        .add_system(menu::check_start_button.run_if(in_state(menu::GameState::Menu)))
+        // state management
+        .add_state::<GameState>()
+        .add_system(state::cleanup::<state::MenuOnly>.in_schedule(OnExit(GameState::Menu)))
+        .add_system(state::cleanup::<state::PlayingOnly>.in_schedule(OnExit(GameState::Playing)))
+        // menu
+        .add_system(menu::create.in_schedule(OnEnter(GameState::Menu)))
+        .add_system(menu::check_start_button.run_if(in_state(GameState::Menu)))
         // junk tiles
         .init_resource::<junk::grid::JunkGrid>()
-        .add_system(junk::tile::create.in_schedule(OnEnter(menu::GameState::Playing)))
-        .add_system(junk::tile::cleanup.in_schedule(OnExit(menu::GameState::Playing)))
+        .add_system(junk::tile::create.in_schedule(OnEnter(GameState::Playing)))
+        .add_system(junk::tile::cleanup.in_schedule(OnExit(GameState::Playing)))
         // snake
-        .add_system(snake::create_initial.in_schedule(OnEnter(menu::GameState::Playing)))
-        .add_system(snake::update_movement.run_if(in_state(menu::GameState::Playing)))
+        .add_system(snake::create_initial.in_schedule(OnEnter(GameState::Playing)))
+        .add_system(snake::update_movement.run_if(in_state(GameState::Playing)))
         .add_system(
             snake::update_render
                 .after(snake::update_movement)
-                .run_if(in_state(menu::GameState::Playing)),
+                .run_if(in_state(GameState::Playing)),
         )
         // player
-        .add_system(player::create.in_schedule(OnEnter(menu::GameState::Playing)))
-        .add_system(player::update.run_if(in_state(menu::GameState::Playing)))
-        .add_system(player::cleanup.in_schedule(OnExit(menu::GameState::Playing)))
+        .add_system(player::create.in_schedule(OnEnter(GameState::Playing)))
+        .add_system(player::update.run_if(in_state(GameState::Playing)))
         .run();
 }
 

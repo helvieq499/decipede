@@ -22,7 +22,7 @@ pub fn create(mut commands: Commands) {
             )),
             ..Default::default()
         })
-        .insert(Player);
+        .insert((Player, crate::state::PlayingOnly));
 }
 
 pub fn update(mut query: Query<&mut Transform, With<Player>>, keyboard: Res<Input<KeyCode>>) {
@@ -44,8 +44,4 @@ pub fn update(mut query: Query<&mut Transform, With<Player>>, keyboard: Res<Inpu
                 );
         }
     });
-}
-
-pub fn cleanup(mut commands: Commands, query: Query<Entity, With<Player>>) {
-    query.for_each(|entity| commands.entity(entity).despawn());
 }

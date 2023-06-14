@@ -4,9 +4,6 @@ use rand::Rng;
 const JUNK_AMOUNT: usize = 25;
 const JUNK_SCREEN: f32 = 0.8;
 
-#[derive(Component)]
-pub struct JunkTile;
-
 pub fn create(mut commands: Commands, mut grid: ResMut<super::grid::JunkGrid>) {
     debug_assert!(JUNK_SCREEN > 0., "screen junk ratio too low");
     debug_assert!(JUNK_SCREEN <= 1., "screen junk ratio too high");
@@ -59,14 +56,9 @@ pub fn create_junk_tile(
             },
             ..Default::default()
         })
-        .insert(JunkTile);
+        .insert(crate::state::PlayingOnly);
 }
 
-pub fn cleanup(
-    mut commands: Commands,
-    query: Query<Entity, With<JunkTile>>,
-    mut grid: ResMut<super::grid::JunkGrid>,
-) {
-    query.for_each(|entity| commands.entity(entity).despawn());
+pub fn cleanup(mut grid: ResMut<super::grid::JunkGrid>) {
     grid.reset();
 }
