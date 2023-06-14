@@ -25,7 +25,11 @@ pub fn create(mut commands: Commands) {
         .insert((Player, crate::state::PlayingOnly));
 }
 
-pub fn update(mut query: Query<&mut Transform, With<Player>>, keyboard: Res<Input<KeyCode>>) {
+pub fn update(
+    mut commands: Commands,
+    mut query: Query<&mut Transform, With<Player>>,
+    keyboard: Res<Input<KeyCode>>,
+) {
     query.for_each_mut(|mut transform| {
         let left = keyboard.pressed(KeyCode::Left) || keyboard.pressed(KeyCode::A);
         let right = keyboard.pressed(KeyCode::Right) || keyboard.pressed(KeyCode::D);
@@ -42,6 +46,27 @@ pub fn update(mut query: Query<&mut Transform, With<Player>>, keyboard: Res<Inpu
                     -crate::Y_EXTENT,
                     -crate::Y_EXTENT + 5. * crate::CELL_HEIGHT as f32,
                 );
+        }
+
+        let fire = keyboard.just_pressed(KeyCode::Space);
+        if fire {
+            let mut transform = transform.clone();
+            transform.translation.z = 0.5;
+
+            commands
+                .spawn(SpriteBundle {
+                    sprite: Sprite {
+                        color: Color::RED,
+                        ..Default::default()
+                    },
+                    transform: transform.with_scale(Vec3::new(
+                        crate::CELL_WIDTH as f32 * 0.3,
+                        crate::CELL_HEIGHT as f32 * 2.0,
+                        1.,
+                    )),
+                    ..Default::default()
+                })
+                .insert((crate::bullet::Bullet, crate::state::PlayingOnly));
         }
     });
 }

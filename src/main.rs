@@ -1,5 +1,6 @@
 use bevy::{prelude::*, window::WindowResolution};
 
+mod bullet;
 mod junk;
 mod menu;
 mod player;
@@ -15,6 +16,11 @@ pub const CELL_WIDTH: usize = 16;
 pub const CELL_HEIGHT: usize = 16;
 pub const X_EXTENT: f32 = ((crate::GRID_WIDTH - 1) * crate::CELL_WIDTH / 2) as f32;
 pub const Y_EXTENT: f32 = ((crate::GRID_HEIGHT - 1) * crate::CELL_HEIGHT / 2) as f32;
+
+// TODO: tile destruction
+// TODO: tile blocking bullets
+// TODO: win condition
+// TODO: slow down snakes (fps limit?)
 
 fn main() {
     App::new()
@@ -60,6 +66,9 @@ fn main() {
         // player
         .add_system(player::create.in_schedule(OnEnter(GameState::Playing)))
         .add_system(player::update.run_if(in_state(GameState::Playing)))
+        // bullet
+        .add_system(bullet::update_movement.run_if(in_state(GameState::Playing)))
+        .add_system(bullet::update_collision.run_if(in_state(GameState::Playing)))
         .run();
 }
 
