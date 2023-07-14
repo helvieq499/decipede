@@ -22,51 +22,43 @@ pub const Y_EXTENT: f32 = ((crate::GRID_HEIGHT - 1) * crate::CELL_HEIGHT / 2) as
 
 fn main() {
     App::new()
-        .add_plugins(
-            DefaultPlugins
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        title: "Decipede".to_string(),
-                        resolution: WindowResolution::new(
-                            (GRID_WIDTH * CELL_WIDTH) as f32,
-                            (GRID_HEIGHT * CELL_HEIGHT) as f32,
-                        ),
-                        ..Default::default()
-                    }),
-                    ..Default::default()
-                })
-                .set(AssetPlugin {
-                    watch_for_changes: true,
-                    ..Default::default()
-                }),
-        )
-        .add_plugin(bevy_ecss::EcssPlugin::with_hot_reload())
-        .add_startup_system(create_camera)
-        // state management
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "Decipede".to_string(),
+                resolution: WindowResolution::new(
+                    (GRID_WIDTH * CELL_WIDTH) as f32,
+                    (GRID_HEIGHT * CELL_HEIGHT) as f32,
+                ),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }))
         .add_state::<GameState>()
-        .add_system(state::cleanup::<state::MenuOnly>.in_schedule(OnExit(GameState::Menu)))
-        .add_system(state::cleanup::<state::PlayingOnly>.in_schedule(OnExit(GameState::Playing)))
-        // menu
-        .add_system(menu::create.in_schedule(OnEnter(GameState::Menu)))
-        .add_system(menu::check_start_button.run_if(in_state(GameState::Menu)))
-        // junk tiles
         .init_resource::<junk::grid::JunkGrid>()
-        .add_system(junk::tile::create.in_schedule(OnEnter(GameState::Playing)))
-        .add_system(junk::tile::cleanup.in_schedule(OnExit(GameState::Playing)))
-        // snake
-        .add_system(snake::create_initial.in_schedule(OnEnter(GameState::Playing)))
-        .add_system(snake::update_movement.run_if(in_state(GameState::Playing)))
-        .add_system(
-            snake::update_render
-                .after(snake::update_movement)
-                .run_if(in_state(GameState::Playing)),
+        .add_systems(Startup, create_camera)
+        .add_systems(OnEnter(GameState::Menu), menu::create)
+        .add_systems(OnExit(GameState::Menu), state::cleanup::<state::MenuOnly>)
+        .add_systems(
+            OnEnter(GameState::Playing),
+            (junk::tile::create, snake::create_initial, player::create),
         )
-        // player
-        .add_system(player::create.in_schedule(OnEnter(GameState::Playing)))
-        .add_system(player::update.run_if(in_state(GameState::Playing)))
-        // bullet
-        .add_system(bullet::update_movement.run_if(in_state(GameState::Playing)))
-        .add_system(bullet::update_collision.run_if(in_state(GameState::Playing)))
+        .add_systems(
+            OnExit(GameState::Playing),
+            (junk::tile::cleanup, state::cleanup::<state::PlayingOnly>),
+        )
+        .add_systems(
+            Update,
+            (
+                (menu::check_start_button).run_if(in_state(GameState::Menu)),
+                (
+                    player::update,
+                    bullet::update_movement,
+                    bullet::update_collision,
+                    (snake::update_movement, snake::update_render).chain(),
+                )
+                    .run_if(in_state(GameState::Playing)),
+            ),
+        )
         .run();
 }
 

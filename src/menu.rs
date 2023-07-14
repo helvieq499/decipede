@@ -7,15 +7,43 @@ pub fn create(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((
             Name::new("Menu"),
-            NodeBundle::default(),
-            bevy_ecss::StyleSheet::new(asset_server.load("style.css")),
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
             crate::state::MenuOnly,
         ))
         .with_children(|parent| {
             parent
-                .spawn((ButtonBundle::default(), StartButton))
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            width: Val::Px(150.),
+                            height: Val::Px(75.),
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            ..Default::default()
+                        },
+                        background_color: Color::rgb_u8(0x11, 0x11, 0x11).into(),
+                        ..Default::default()
+                    },
+                    StartButton,
+                ))
                 .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section("Start", TextStyle::default()));
+                    parent.spawn(TextBundle::from_section(
+                        "Start",
+                        TextStyle {
+                            color: Color::WHITE,
+                            font_size: 40.,
+                            font: asset_server.load("OpenSans-Regular.ttf"),
+                        },
+                    ));
                 });
         });
 }
@@ -26,7 +54,7 @@ pub fn check_start_button(
 ) {
     for interaction in query.iter() {
         match interaction {
-            Interaction::Clicked => next_state.set(crate::GameState::Playing),
+            Interaction::Pressed => next_state.set(crate::GameState::Playing),
             // todo: hover lighten background color
             _ => (),
         }
